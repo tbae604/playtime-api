@@ -13,9 +13,13 @@ const path = require('path');
 
 const Comment = require('./models/comment.js');
 
-const app = express();
 const url = 'mongodb://localhost:27017/comments';
-const port = 27017;
+const port = 9000;
+
+const app = express();
+// read posts with Content-Type: application/json
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // Routing
@@ -24,15 +28,19 @@ app.get('/', function(request, response) {
 });
 
 app.get('/api/comments', function(request, response) {
-    Comment.find({}).then(eachOne => {
-        response.json(eachOne);
+    Comment.find().then(comments => {
+        response.json({comments});
     });
 });
 
 app.post('/api/comments', function(request, response) {
+
+    console.log(`request.body is ${request.body}`);  // undefined
+
     Comment.create({
-        guestComment: request.body.CommentOfGuest,
-        message: request.body.MessageOfGuest,
+        created: Date.now(),
+        user: request.body.user,
+        message: request.body.message,
     }).then(comment => {
         response.json(comment);
     });
