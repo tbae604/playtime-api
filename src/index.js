@@ -11,9 +11,9 @@ const mongoose = require('mongoose');
 const parseUrl = require('parseurl');
 const path = require('path');
 
-const Comment = require('./models/comment.js');
+const Post = require('./models/post.js');
 
-const url = 'mongodb://localhost:27017/comments';
+const url = 'mongodb://localhost:27017/posts';
 const port = 9000;
 
 const app = express();
@@ -27,22 +27,25 @@ app.get('/', function(request, response) {
     response.json('You did it!');
 });
 
-app.get('/api/comments', function(request, response) {
-    Comment.find().then(comments => {
-        response.json({comments});
+app.get('/api/posts', function(request, response) {
+    Post.find().then(posts => {
+        response.json({posts});
     });
 });
 
-app.post('/api/comments', function(request, response) {
+app.post('/api/posts', function(request, response) {
 
     console.log(`request.body is ${request.body}`);  // undefined
 
-    Comment.create({
-        created: Date.now(),
+    Post.create({
         user: request.body.user,
-        message: request.body.message,
-    }).then(comment => {
-        response.json(comment);
+        created: Date.now(),
+        title: request.body.title,
+        description: request.body.description,
+        tags: request.body.tags,
+        content: request.body.content,
+    }).then(post => {
+        response.json(post);
     });
 });
 
