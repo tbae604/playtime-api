@@ -13,7 +13,7 @@ const path = require('path');
 
 const Post = require('./models/post.js');
 
-const url = 'mongodb://localhost:27017/posts';
+const url = process.env.MONGOLAB_URI;
 const port = 9000;
 
 const app = express();
@@ -61,6 +61,6 @@ mongoose.connect(url, { useNewUrlParser: true }, function(error, db) {
 
 
 // Set up app listener
-app.listen(port, function() {
-    console.log(`Listening to port ${port}`);  // non-blocking :3
+app.listen((process.env.POST || port), function() {
+    console.log(`Listening to port ${(process.env.POST || port)}`);  // non-blocking :3
 });
