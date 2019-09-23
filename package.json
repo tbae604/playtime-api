@@ -1,13 +1,16 @@
 {
   "name": "playtime-api",
   "version": "0.0.0",
-  "description": "Test server app",
+  "description": "Test blog server app",
+  "author": "tbae604",
   "main": "index.js",
+  "engines": {
+    "node": "11.6.0"
+  },
   "scripts": {
     "start": "node src/index.js",
     "test": "npm test"
   },
-  "author": "tbae604",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
