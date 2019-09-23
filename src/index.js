@@ -61,6 +61,6 @@ mongoose.connect(url, { useNewUrlParser: true }, function(error, db) {
 
 
 // Set up app listener
-app.listen((process.env.POST || port), function() {
-    console.log(`Listening to port ${(process.env.POST || port)}`);  // non-blocking :3
+app.listen((process.env.PORT || port), function() {
+    console.log(`Listening to port ${(process.env.PORT || port)}`);  // non-blocking :3
 });
