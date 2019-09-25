@@ -19,7 +19,8 @@ const jwt = require('jsonwebtoken');
 const User = require('./models/user.js');
 const Post = require('./models/post.js');
 
-const url = process.env.MONGOLAB_URI;
+const url = "mongodb://localhost:27017/playtime";
+// const url = process.env.MONGOLAB_URI;
 const secret = process.env.SECRET;
 const port = 9000;
 

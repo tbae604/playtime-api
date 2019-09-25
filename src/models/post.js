@@ -8,7 +8,7 @@ const postSchema = new Schema({
     description: String,
     tags: [String],
     content: String,
-}, {collection: 'playtime_posts'});
+}, {collection: 'posts'});
 
 const Post = mongoose.model('Post', postSchema);
 module.exports = Post;

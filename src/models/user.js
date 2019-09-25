@@ -5,7 +5,7 @@ const userSchema = new Schema({
     name: String,
     email: String,
     password: String,
-}, {collection: 'playtime_posts'});
+}, {collection: 'users'});
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
