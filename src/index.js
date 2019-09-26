@@ -30,6 +30,30 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+function verifyToken(request, response, next) {
+    let token = request.headers['x-access-token'];
+    
+    if (!token) {
+        return response.status(403).send({
+            auth: false,
+            message: 'No token provided.',
+        });
+    }
+
+    jwt.verify(token, secret, function(error, decoded) {
+        if (error) {
+            return response.status(500).send({
+                auth: false,
+                message: 'Failed to authenticate token',
+            })
+        } else {
+            request.userId = decoded.id;  // so the next() has it
+            next();
+        }
+    });
+}
+
+
 // Routing
 app.get('/', function(request, response) {
     response.json('You did it!');
@@ -86,86 +110,50 @@ app.post('/api/register', function(request, response) {
     });
 });
 
-app.get('/api/users', function(request, response) {
-    let token = request.headers['x-access-token'];
-
-    if (!token) {
-        return response.status(401).send({
-            auth: false,
-            message: "No auth token provided."
-        });
-    }
-
-    jwt.verify(token, secret, function(error, decoded) {
+app.get('/api/users', verifyToken, function(request, response, next) {
+    // projection so password not returned
+    User.find({}, {password: 0}, function (error, users) {
         if (error) {
-            response.status(500).send({
-                auth: false,
-                message: "Failed to authenticate token"
-            })
-        } else {
-            User.find().then(users => {
-                response.json({users});
-            })
+            return response.status(500).send("There was a problem retrieving that user.");
         }
-    })
+        if (!users) {
+            return response.status(404).send("No user found.");
+        }
+        response.json({users});
+    });
 });
-
 
 /*
 Post stuff
 */
-app.get('/api/posts', function(request, response) {
-    let token = request.headers['x-access-token'];
-
-    if (!token) {
-        return response.status(401).send({
-            auth: false,
-            message: "No auth token provided."
-        });
-    }
-
-    jwt.verify(token, secret, function(error, decoded) {
+app.get('/api/posts', verifyToken, function(request, response, next) {
+    Post.find(function (error, posts) {
         if (error) {
-            response.status(500).send({
-                auth: false,
-                message: "Failed to authenticate token"
-            })
-        } else {
-            Post.find().then(posts => {
-                response.json({posts});
-            });
+            return response.status(500).send("There was a problem retrieving all posts.");
         }
+        if (!posts) {
+            return response.status(404).send("No posts found.");
+        }
+        response.json({posts});
     });
 });
 
-app.post('/api/posts', function(request, response) {
-    let token = request.headers['x-access-token'];
-
-    if (!token) {
-        return response.status(401).send({
-            auth: false,
-            message: "No auth token provided."
-        });
-    }
-
-    jwt.verify(token, secret, function(error, decoded) {
+app.post('/api/posts', verifyToken, function(request, response, next) {
+    Post.create({
+        user: request.body.user,
+        created: Date.now(),
+        title: request.body.title,
+        description: request.body.description,
+        tags: request.body.tags,
+        content: request.body.content,
+    }, function(error, post) {
         if (error) {
-            response.status(500).send({
-                auth: false,
-                message: "Failed to authenticate token"
-            })
-        } else {
-            Post.create({
-                user: request.body.user,
-                created: Date.now(),
-                title: request.body.title,
-                description: request.body.description,
-                tags: request.body.tags,
-                content: request.body.content,
-            }).then(post => {
-                response.json(post);
-            });
+            return response.status(500).send("There was a problem submitting that post.");
         }
+        if (!post) {
+            return response.status(404).send("No post found!");
+        }
+        response.json(post);
     });
 });
 
