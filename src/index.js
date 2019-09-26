@@ -123,6 +123,20 @@ app.get('/api/users', verifyToken, function(request, response, next) {
     });
 });
 
+app.get('/api/users/:userId', verifyToken, function(request, response, next) {
+    let userId = request.params.userId;
+    // projection so password not returned
+    User.findOne({_id: userId}, {password: 0}, function (error, user) {
+        if (error) {
+            return response.status(500).send("There was a problem retrieving that user.");
+        }
+        if (!user) {
+            return response.status(404).send("No user found.");
+        }
+        response.json({user});
+    });
+});
+
 /*
 Post stuff
 */
@@ -154,6 +168,19 @@ app.post('/api/posts', verifyToken, function(request, response, next) {
             return response.status(404).send("No post found!");
         }
         response.json(post);
+    });
+});
+
+app.get('/api/posts/:postId', verifyToken, function(request, response, next) {
+    let postId = request.params.postId;
+    Post.findOne({_id: postId}, function (error, post) {
+        if (error) {
+            return response.status(500).send("There was a problem retrieving that post.");
+        }
+        if (!post) {
+            return response.status(404).send("No post found.");
+        }
+        response.json({post});
     });
 });
 
