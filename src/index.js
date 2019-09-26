@@ -35,37 +35,37 @@ app.get('/', function(request, response) {
     response.json('You did it!');
 });
 
-// !!! TEST
-app.get('/api/users', function(request, response) {
-    User.find().then(users => {
-        response.json({users});
-    })
+/*
+User stuff
+*/
+app.post('/api/login', function(request, response) {
+    User.findOne({ name: request.body.name }, function(error, user) {
+        if (error) {
+            return response.status(500).send("There was a problem with login.");
+        }
+        if (!user) {
+            return response.status(404).send("No user found with that name.");
+        }
+
+        let passwordIsValid = bcrypt.compareSync(request.body.password, user.password);
+        if (!passwordIsValid) {
+            return response.status(401).send({ auth: false, token: null});
+        }
+
+        let token = jwt.sign(
+            { id: user._id },
+            secret,
+            { expiresIn: 86400 }  // 24 hours
+        );
+        response.status(200).send({ auth: true, token: token });
+    });
 });
 
-// !!! TEST
-app.get('/api/test', function(request, response) {
-    let token = request.headers['x-access-token'];
+// Not necessary tbh
+app.get('/api/logout', function(request, response) {
+    response.status(200).send({ auth: false, token: null });
+});
 
-    if (!token) {
-        return response.status(401).send({
-            auth: false,
-            message: "No auth token provided."
-        });
-    }
-
-    jwt.verify(token, secret, function(error, decoded) {
-        if (error) {
-            response.status(500).send({
-                auth: false,
-                message: "Failed to authenticate token"
-            })
-        } else {
-            response.status(200).send(decoded);
-        }
-    })
-})
-
-// !!! TEST
 app.post('/api/register', function(request, response) {
     let hashedPassword = bcrypt.hashSync(request.body.password, 8);
 
@@ -86,25 +86,86 @@ app.post('/api/register', function(request, response) {
     });
 });
 
+app.get('/api/users', function(request, response) {
+    let token = request.headers['x-access-token'];
+
+    if (!token) {
+        return response.status(401).send({
+            auth: false,
+            message: "No auth token provided."
+        });
+    }
+
+    jwt.verify(token, secret, function(error, decoded) {
+        if (error) {
+            response.status(500).send({
+                auth: false,
+                message: "Failed to authenticate token"
+            })
+        } else {
+            User.find().then(users => {
+                response.json({users});
+            })
+        }
+    })
+});
+
+
+/*
+Post stuff
+*/
 app.get('/api/posts', function(request, response) {
-    Post.find().then(posts => {
-        response.json({posts});
+    let token = request.headers['x-access-token'];
+
+    if (!token) {
+        return response.status(401).send({
+            auth: false,
+            message: "No auth token provided."
+        });
+    }
+
+    jwt.verify(token, secret, function(error, decoded) {
+        if (error) {
+            response.status(500).send({
+                auth: false,
+                message: "Failed to authenticate token"
+            })
+        } else {
+            Post.find().then(posts => {
+                response.json({posts});
+            });
+        }
     });
 });
 
 app.post('/api/posts', function(request, response) {
+    let token = request.headers['x-access-token'];
 
-    console.log(`request.body is ${request.body}`);  // undefined
+    if (!token) {
+        return response.status(401).send({
+            auth: false,
+            message: "No auth token provided."
+        });
+    }
 
-    Post.create({
-        user: request.body.user,
-        created: Date.now(),
-        title: request.body.title,
-        description: request.body.description,
-        tags: request.body.tags,
-        content: request.body.content,
-    }).then(post => {
-        response.json(post);
+    jwt.verify(token, secret, function(error, decoded) {
+        if (error) {
+            response.status(500).send({
+                auth: false,
+                message: "Failed to authenticate token"
+            })
+        } else {
+            Post.create({
+                user: request.body.user,
+                created: Date.now(),
+                title: request.body.title,
+                description: request.body.description,
+                tags: request.body.tags,
+                content: request.body.content,
+            }).then(post => {
+                response.json(post);
+            });
+        }
     });
 });
 
@@ -121,5 +182,5 @@ mongoose.connect(url, { useNewUrlParser: true }, function(error, db) {
 
 // Set up app listener
 app.listen((process.env.PORT || port), function() {
-    console.log(`Listening to port ${(process.env.PORT || port)}`);  // non-blocking :3
+    console.log(`Listening to port ${(process.env.PORT || port)}`);
 });
