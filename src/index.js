@@ -30,7 +30,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-function verifyToken(request, response, next) {
+// express middleware function for authorization
+export function verifyToken(request, response, next) {
     let token = request.headers['x-access-token'];
     
     if (!token) {
