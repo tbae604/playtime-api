@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // express middleware function for authorization
-export function verifyToken(request, response, next) {
+function verifyToken(request, response, next) {
     let token = request.headers['x-access-token'];
     
     if (!token) {
@@ -200,3 +200,7 @@ mongoose.connect(url, { useNewUrlParser: true }, function(error, db) {
 app.listen((process.env.PORT || port), function() {
     console.log(`Listening to port ${(process.env.PORT || port)}`);
 });
+
+
+// Node CommonJS Module syntax-resilient exports
+module.exports = verifyToken;
