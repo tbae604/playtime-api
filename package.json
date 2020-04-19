@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "license": "ISC",
   "dependencies": {
@@ -37,6 +37,9 @@
     "path": "^0.12.7"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   }
 }
