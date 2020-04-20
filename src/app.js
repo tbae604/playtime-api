@@ -50,7 +50,7 @@ function verifyToken(request, response, next) {
 
 // Routing
 app.get('/', function(request, response) {
-    response.json('You did it!');
+    response.json('You look great today!');
 });
 
 /*
