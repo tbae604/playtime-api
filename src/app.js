@@ -148,7 +148,7 @@ app.get('/api/posts', verifyToken, function(request, response, next) {
 
 app.post('/api/posts', verifyToken, function(request, response, next) {
     Post.create({
-        user: request.body.user,
+        user: request.body.user,  // User _id
         created: Date.now(),
         title: request.body.title,
         description: request.body.description,
